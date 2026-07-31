@@ -1,7 +1,7 @@
 # InsightAI — Interview Prompt Redesign: Maximizing Evidence Quality Per Follow-Up
 
 **Document 25 of the series**
-**Status:** Design only — the prompt text below is ready to paste into `openrouter.provider.ts`'s `buildMessages`, but not yet wired in, pending review (same rhythm as Documents 23-24).
+**Status:** Implemented and A/B tested (see §8 — Addendum). Wired into `openrouter.provider.ts`, commit `17cd9be`.
 **Scope discipline:** The five-layer architecture (Research Objectives, Conversation Objectives, Interview Policy, Evidence Levels, Evidence Contract) is unchanged. This document elaborates Layer 4 (Interview Policy) — the *reasoning process* behind each follow-up — without touching schema, termination logic, or any other layer.
 
 ---
@@ -137,4 +137,21 @@ Scripted respondent personas to run through the emulator (extending Document 18'
 
 ---
 
-**Ready for review. Not yet wired into `openrouter.provider.ts` pending approval, consistent with how Documents 23-24 were handled.**
+## 8. Addendum — Real A/B Test Result (Not Simulated, Not Estimated)
+
+**Method:** the exact same scripted 8-message conversation (a property owner describing tenant-finding problems, real OpenRouter calls, `openai/gpt-4o-mini`) was run twice against two separately-generated but comparable Idea-Intake projects — once against the prompt as it existed *before* this document (baseline), once *after* wiring in §1's redesigned block. Both transcripts were reviewed line-by-line against this document's own Evaluation Checklist (§6).
+
+| Checklist Item | Before | After | Verdict |
+|---|---|---|---|
+| Two questions in one turn | 2 occurrences | 2 occurrences | ❌ No improvement |
+| Reply opens with a summarizing preamble ("يبدو أن...", "من الواضح أن...") | 6 of 6 turns | 6 of 7 turns | ⚠️ Marginal |
+| Repeated emotional ("how did that feel") questions | 3 occurrences | ~1 occurrence | ✅ Real improvement |
+| Solution/tool talk raised before problem evidence was strong | Only at the very end | As early as turn 3 | ❌ Slightly worse |
+
+**Honest interpretation:** this is a partial, mixed result — not the clean win a first read of §1 might suggest. Critically, the two most mechanically-checkable rules (one question per turn; no forced preamble) were **already present as explicit hard rules in the prompt this document replaced** — and the model violated them at close to the same rate regardless. This points away from "the instructions weren't clear enough" and toward a different diagnosis: **`gpt-4o-mini` does not reliably hold this many simultaneous behavioral constraints across turns**, independent of how the prompt is worded. Confirmed via commit `17cd9be`'s message and this addendum — not asserted from memory, written down at the time the test ran.
+
+**Agreed next steps (founder-directed sequencing):**
+1. Document the result here (this section) — done.
+2. Design a code-level **Interview Orchestrator** ([Document 26](./26-interview-orchestrator.md)) that measures these specific violations deterministically per turn, rather than relying solely on the model to self-police.
+3. Implement the Orchestrator.
+4. **Only if** `gpt-4o-mini` still shows the same violation rate *after* the Orchestrator is in place, evaluate a stronger model on the interview-turn call specifically — same scripted test, same checklist, real numbers again.
