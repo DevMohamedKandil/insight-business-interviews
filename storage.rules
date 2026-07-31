@@ -1,0 +1,12 @@
+rules_version = '2';
+
+// Document 6 — exports (Document 9 §3.4) are written by the exportSessions Cloud
+// Function and served via short-lived signed URLs, never read directly through the
+// Storage client SDK, so client access here is deny-by-default.
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

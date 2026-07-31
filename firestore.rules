@@ -1,0 +1,108 @@
+rules_version = '2';
+
+// Document 6 §2 / §8A. Core principle: the client gets the minimum access needed for
+// real-time reads; almost no direct writes. Everything with business/cost/security
+// meaning goes through Cloud Functions (Admin SDK, bypasses these rules entirely).
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.admin == true;
+    }
+
+    // --- templates -----------------------------------------------------------
+    // Public clients may read only `live` templates, and in practice the frontend
+    // only ever requests the small set of fields it needs to render the interview
+    // shell (Document 6 §2.1) — prompt/rules are never read by non-admin clients,
+    // by convention enforced at the query layer; this rule additionally guarantees
+    // no *write* path exists for a non-admin regardless.
+    match /templates/{templateId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.status == 'live');
+      allow write: if isAdmin();
+
+      match /versions/{versionId} {
+        allow read: if isAdmin();
+        allow write: if false; // written only by the publishTemplate Cloud Function
+      }
+    }
+
+    // --- projects / hypotheses / evidenceLog (Idea Intake, ADR-0016/0017/0018) ---
+    // Founder-facing but admin-only (Assumption A1 — the founder IS the operator).
+    // Writes happen only via generateProjectDraft/approveProjectDraft Cloud
+    // Functions (Admin SDK) — same "no direct client writes to anything with
+    // business meaning" principle as ADR-0007, applied here too.
+    match /projects/{projectId} {
+      allow read: if isAdmin();
+      allow write: if false;
+
+      match /hypotheses/{hypothesisId} {
+        allow read: if isAdmin();
+        allow write: if false;
+
+        match /evidenceLog/{logId} {
+          allow read: if isAdmin();
+          allow write: if false;
+        }
+      }
+    }
+
+    // --- sessions / messages ---------------------------------------------------
+    // ADR-0007: clients never write here directly, full stop. A respondent may only
+    // *read* their own session (for onSnapshot-driven live UI updates); every write
+    // happens via startSession / sendMessage / resumeSession, all under Admin SDK.
+    match /sessions/{sessionId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.respondentUid == request.auth.uid);
+      allow write: if false;
+
+      match /messages/{messageId} {
+        allow read: if isAdmin() || (isSignedIn() && get(/databases/$(database)/documents/sessions/$(sessionId)).data.respondentUid == request.auth.uid);
+        allow write: if false;
+      }
+    }
+
+    // --- system-only collections -------------------------------------------------
+    match /sessionResumeTokens/{token} {
+      allow read, write: if false; // Document 6 §8A — never exposed to any client, including admin
+    }
+
+    match /synthesisReports/{reportId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    match /quotes/{quoteId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    match /opportunities/{opportunityId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    match /analyticsRollups/{rollupId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    match /aiProviderConfigs/{provider} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /configurations/{configId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /auditLogs/{logId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+  }
+}

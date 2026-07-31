@@ -1,0 +1,30 @@
+{
+  "name": "@insightai/functions",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": "22"
+  },
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "build:watch": "tsc -p tsconfig.json --watch",
+    "serve": "npm run build && firebase emulators:start --only functions,firestore,auth",
+    "shell": "npm run build && firebase functions:shell",
+    "test": "mocha -r ts-node/register 'test/**/*.spec.ts'"
+  },
+  "dependencies": {
+    "@insightai/shared-types": "0.1.0",
+    "firebase-admin": "^13.0.0",
+    "firebase-functions": "^6.1.0"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.0",
+    "ts-node": "^10.9.2",
+    "mocha": "^10.7.3",
+    "chai": "^4.5.0",
+    "@types/mocha": "^10.0.7",
+    "@types/chai": "^4.3.16",
+    "@types/node": "^22.10.0"
+  }
+}
