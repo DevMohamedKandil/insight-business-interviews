@@ -18,6 +18,7 @@ import { AIProviderFactory } from '../providers/ai-provider.factory';
 import { SpendGuardService } from './spend-guard.service';
 import { AbuseDetectionService } from './abuse-detection.service';
 import { mergeEvidenceLevel, isStrongOrVerified } from './evidence-level.util';
+import { detectPolicyViolations } from './interview-policy-violations.util';
 
 const HISTORY_WINDOW_TURNS = 12; // Document 10 §3 — 12 turns = 24 messages
 const RESUME_TOKEN_TTL_DAYS_FALLBACK = 7;
@@ -236,6 +237,16 @@ export class InterviewService {
     const abuseFlag = heuristicFlag || output.selfReportedInjectionAttempt;
     const nextTurnIndex = await this.messageRepo.count(sessionId);
 
+    // Document 26, Phase A (Measurement Only): deterministic, non-LLM checks — logged
+    // for visibility, never blocking or altering this turn's already-streamed reply.
+    const previousAssistantMessage = [...recentMessages].reverse().find((m) => m.role === 'assistant');
+    const policyViolations = detectPolicyViolations(
+      output.replyText,
+      session.conversationObjectiveEvidence,
+      version.conversationObjectives.map((o) => o.id),
+      previousAssistantMessage?.text ?? null
+    );
+
     // Step 8: persist respondent + assistant messages.
     const respondentMessageId = await this.messageRepo.append(sessionId, {
       role: 'respondent',
@@ -311,6 +322,7 @@ export class InterviewService {
         costEstimateUsd: output.usage.costEstimateUsd,
         latencyMs,
         abuseFlag,
+        policyViolations, // Document 26 Phase A — measurement only, never fed back yet
       },
       createdAt: Date.now(),
     });
