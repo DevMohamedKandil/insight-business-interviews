@@ -3,6 +3,7 @@
 **Document 21 of the planning series** (continuing the numbering from Documents 1-20)
 **Owner:** Founder, acting as Head of Product Validation for this phase
 **Status:** Active — use this document, don't just read it once
+**Scope note ([Document 28](./28-validation-sprint-policy.md)):** everything below assumes Sprint 1's confirmed mode — face-to-face, `localhost`, observer present. The "First User Protocol" (§2) in particular is written for an in-person handoff, consistent with that policy.
 
 ---
 

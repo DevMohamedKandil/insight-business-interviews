@@ -1,28 +1,23 @@
 # InsightAI — First External Validation Kit (Validation Sprint 1)
 
 **Document 27 of the series**
-**Status:** Operational kit — no code, no prompt changes, no architecture changes. System frozen per instruction.
+**Status:** Ready for First External Validation. Operational kit — no code, no prompt changes, no architecture changes. System frozen per instruction.
 **Scope:** Everything needed to run interview #1 with a real external participant, and to record what happens without contaminating evidence with interpretation.
+**Mode (confirmed, [Document 28](./28-validation-sprint-policy.md)):** Face-to-face, `localhost`, observer (you) present, on your laptop. No remote participants, no deployment, for the entirety of Sprint 1.
 
 ---
 
-## 0. Blocker Assessment (Answering the Direct Question First)
+## 0. Blocker Assessment — Resolved
 
-**Conditional — not a blanket "Ready."** One concrete, evidence-based gap, stated plainly:
+The one gap this document originally flagged (localhost is only reachable on the machine running the emulator) is **not a blocker under the confirmed policy** — Sprint 1 is explicitly face-to-face, same-laptop, per Document 28. The remote-access question that would have made this a hard blocker is a Sprint 2 concern, deliberately deferred, not an open item here.
 
-Every session run this entire project — automated tests, the founder's own simulated run, all of it — was opened at `http://localhost:4310`, served by an emulator running on one specific machine. This is directly verifiable from this project's own history: `firebase login` was never completed, no real Firebase project was ever created, and Document 19's "real deployment" was designed but never executed. `localhost` is not reachable from any device other than the one running the emulator.
-
-**This means:**
-- **If the first participant sits at the same machine/browser as you (in person, your laptop, your network) → no blocker. Proceed.**
-- **If the first participant is meant to open the link remotely, on their own device → this is a hard blocker.** The link will not resolve for them. There is no workaround short of an actual deployment (Document 19), which is a real, consequential action (Blaze billing, `firebase login`) — not something to do silently as a side effect of "preparing an interview."
-
-**You need to tell me which mode Interview #1 is** before the checklist in §1 can be marked complete — everything below assumes you'll confirm this first.
+**Ready for First External Validation.**
 
 ---
 
 ## 1. Checklist Before Inviting the Participant
 
-- [ ] **Confirmed: in-person (same device) or remote?** (See §0 — this gates everything else.)
+- [x] Mode confirmed: face-to-face, your laptop, `localhost` (Document 28)
 - [ ] Emulator Suite running (`firebase emulators:start`) — confirm all four services up, not just assumed
 - [ ] `ng serve` running at `localhost:4310`
 - [ ] Decided which template/topic is actually relevant to *this specific participant* — do not default to whichever one was last used for a technical test

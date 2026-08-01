@@ -2,7 +2,7 @@
 
 **Document 19 of 20**
 **Depends on:** [18-testing-strategy.md](./18-testing-strategy.md), [06-security-model.md](./06-security-model.md) §8
-**Status:** Draft for approval
+**Status:** Design approved; execution intentionally deferred to Validation Sprint 2 ([Document 28](./28-validation-sprint-policy.md)). Nothing below changes — it simply isn't run yet.
 
 ---
 
